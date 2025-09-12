@@ -121,8 +121,8 @@ class ColumnMapper:
         
         mapping = {}
         
-        # Create mapping interface
-        col1, col2 = st.columns([1, 1])
+        # Create mapping interface - adjusted spacing
+        col1, col2 = st.columns([0.8, 1.2])
         
         with col1:
             st.markdown("#### Required Fields")
@@ -143,13 +143,12 @@ class ColumnMapper:
         column_options = ["-- Select Column --"] + clean_columns
         
         for target_col, config in self.columns.items():
-            col1, col2 = st.columns([1, 1])
+            col1, col2 = st.columns([0.8, 1.2])
             
             with col1:
                 # Show field info - all fields are now optional
                 st.markdown(f"📋 **{config['display_name']}**")
                 st.markdown(f"*{config['description']}*")
-                st.markdown("Optional")
             
             with col2:
                 # Get current selection

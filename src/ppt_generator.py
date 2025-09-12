@@ -37,16 +37,16 @@ class PowerPointGenerator:
         self.slide_width = Inches(13.33)
         self.slide_height = Inches(7.5)
         
-        # Table positioning and sizing - optimized to fit within slide boundaries
-        self.table_left = Inches(0.4)
+        # Table positioning and sizing - further optimized to match template
+        self.table_left = Inches(0.3)
         self.table_top = Inches(1.8)
-        self.table_width = Inches(11.5)  # Reduced to fit better within slide
+        self.table_width = Inches(10.0)  # Further reduced to ensure proper fit
         self.table_height = Inches(5.0)
         
-        # Status summary positioning - optimized to avoid table overlap
-        self.status_summary_left = Inches(9.5)  # Moved left to avoid overlap
+        # Status summary positioning - repositioned to match template layout
+        self.status_summary_left = Inches(8.8)  # Further left to fit within boundaries
         self.status_summary_top = Inches(0.4)   
-        self.status_summary_width = Inches(3.0)  # Slightly narrower to fit better
+        self.status_summary_width = Inches(2.5)  # Narrower to match template
         self.status_summary_height = Inches(1.3)
     
     def _hex_to_rgb(self, hex_color: str) -> Tuple[int, int, int]:
@@ -260,8 +260,8 @@ class PowerPointGenerator:
         ).table
         
         # Set column widths with precise measurements for consistency
-        # Optimized column widths to fit within slide and match template proportions
-        col_widths = [Inches(1.0), Inches(1.2), Inches(3.5), Inches(1.0), Inches(2.3), Inches(1.5)]
+        # Further optimized column widths to fit within reduced table width (10.0 inches total)
+        col_widths = [Inches(0.9), Inches(1.1), Inches(3.2), Inches(0.9), Inches(2.1), Inches(1.3)]
         for i, width in enumerate(col_widths):
             if i < len(table.columns):
                 table.columns[i].width = width
