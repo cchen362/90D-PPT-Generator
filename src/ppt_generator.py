@@ -105,7 +105,7 @@ class PowerPointGenerator:
                 # Create slide
                 slide = self._create_ranking_slide(
                     prs, ranking, slide_data, slide_number,
-                    slide_idx + 1, num_slides
+                    slide_idx + 1, num_slides, df
                 )
                 slide_number += 1
         
@@ -118,7 +118,8 @@ class PowerPointGenerator:
     
     def _create_ranking_slide(self, prs: Presentation, ranking: str, 
                              data: pd.DataFrame, slide_number: int,
-                             ranking_slide_num: int, total_ranking_slides: int) -> object:
+                             ranking_slide_num: int, total_ranking_slides: int,
+                             complete_ranking_data: pd.DataFrame) -> object:
         """Create a single slide for a ranking category"""
         
         # Add blank slide
@@ -128,8 +129,8 @@ class PowerPointGenerator:
         # Add title
         self._add_slide_title(slide, ranking, ranking_slide_num, total_ranking_slides)
         
-        # Add status summary
-        self._add_status_summary(slide, data)
+        # Add status summary (use complete ranking data for totals across all slides)
+        self._add_status_summary(slide, complete_ranking_data)
         
         # Add main data table
         self._add_data_table(slide, data)
@@ -185,7 +186,16 @@ class PowerPointGenerator:
         
         subtitle_p = subtitle_frame.paragraphs[0]
         subtitle_run = subtitle_p.add_run()
-        subtitle_text = "Will be worked this 90"
+        
+        # Ranking-specific subtitles
+        subtitle_messages = {
+            'Accepted': "Will be worked this 90",
+            'Up Next': "Can do this 90", 
+            'Maybe': "Will not be worked this 90",
+            'Likely No': "Will not be worked this 90"
+        }
+        
+        subtitle_text = subtitle_messages.get(ranking, "Will be worked this 90")
         if total_slides > 1:
             subtitle_text += f" (Page {slide_num} of {total_slides})"
         subtitle_run.text = subtitle_text

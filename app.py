@@ -624,9 +624,13 @@ def render_step_configuration():
             if ranking_counts:
                 st.markdown("**Select Rankings:**")
                 selected_rankings = []
-                for ranking, count in ranking_counts.items():
-                    if st.checkbox(f"{ranking} ({count} items)", value=True, key=f"ranking_{ranking}"):
-                        selected_rankings.append(ranking)
+                # Display rankings in the correct order: Accepted > Up Next > Maybe > Likely No
+                ranking_order = ['Accepted', 'Up Next', 'Maybe', 'Likely No']
+                for ranking in ranking_order:
+                    if ranking in ranking_counts:
+                        count = ranking_counts[ranking]
+                        if st.checkbox(f"{ranking} ({count} items)", value=True, key=f"ranking_{ranking}"):
+                            selected_rankings.append(ranking)
                 
                 st.session_state.selected_rankings = selected_rankings
                 
@@ -670,8 +674,10 @@ def render_step_configuration():
         total_items = sum(ranking_counts[ranking] for ranking in st.session_state.selected_rankings if ranking in ranking_counts)
         total_slides = 0
         
-        for ranking in st.session_state.selected_rankings:
-            if ranking in ranking_counts:
+        # Display generation summary in the correct order: Accepted > Up Next > Maybe > Likely No
+        ranking_order = ['Accepted', 'Up Next', 'Maybe', 'Likely No']
+        for ranking in ranking_order:
+            if ranking in st.session_state.selected_rankings and ranking in ranking_counts:
                 items = ranking_counts[ranking]
                 slides = (items + rows_per_slide - 1) // rows_per_slide  # Ceiling division
                 total_slides += slides
