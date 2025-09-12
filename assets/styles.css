@@ -1,0 +1,209 @@
+/* Custom CSS for 90D-PPT Generator */
+
+/* Import Google Fonts for fallback */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Root variables for brand colors */
+:root {
+    --navy: #00175A;
+    --light-blue: #66A9F2;
+    --grey: #A7A8AA;
+    --white: #FFFFFF;
+    --black: #000000;
+    --light-grey: #F5F5F5;
+    --success-green: #28A745;
+    --error-red: #DC3545;
+    --warning-orange: #FFC107;
+}
+
+/* Main container styling */
+.main {
+    font-family: "Inter", Arial, sans-serif;
+    background-color: var(--white);
+    color: var(--navy);
+}
+
+/* Header styling */
+.main-header {
+    background: linear-gradient(90deg, var(--navy) 0%, var(--light-blue) 100%);
+    color: var(--white);
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.main-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.main-header p {
+    margin: 0.5rem 0 0 0;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Upload area styling */
+.upload-area {
+    border: 2px dashed var(--light-blue);
+    border-radius: 10px;
+    padding: 3rem;
+    text-align: center;
+    background-color: var(--light-grey);
+    margin: 2rem 0;
+    transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+    border-color: var(--navy);
+    background-color: #e8f4ff;
+}
+
+/* Button styling */
+.stButton > button {
+    background-color: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.stButton > button:hover {
+    background-color: var(--light-blue);
+}
+
+/* Progress bar styling */
+.stProgress .st-bo {
+    background-color: var(--light-blue);
+}
+
+/* Success/error message styling */
+.success-message {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 5px;
+    padding: 1rem;
+    color: #155724;
+    margin: 1rem 0;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    padding: 1rem;
+    color: #721c24;
+    margin: 1rem 0;
+}
+
+/* Data table styling */
+.dataframe {
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 0.9rem;
+}
+
+.dataframe th {
+    background-color: var(--navy);
+    color: var(--white);
+    font-weight: 600;
+    padding: 0.75rem;
+}
+
+.dataframe td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--light-grey);
+}
+
+.dataframe tr:nth-child(even) {
+    background-color: var(--light-grey);
+}
+
+/* Column mapping interface */
+.column-mapping {
+    background-color: var(--light-grey);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+}
+
+.column-mapping h3 {
+    color: var(--navy);
+    margin-bottom: 1rem;
+}
+
+/* Slide preview styling */
+.slide-preview {
+    border: 2px solid var(--grey);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    background-color: var(--white);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.slide-preview h4 {
+    color: var(--navy);
+    margin-bottom: 0.5rem;
+}
+
+/* Configuration panel */
+.config-panel {
+    background-color: #f8f9fa;
+    border-left: 4px solid var(--light-blue);
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.config-panel h4 {
+    color: var(--navy);
+    margin-bottom: 0.5rem;
+}
+
+/* Status indicators */
+.status-in-progress {
+    color: var(--light-blue);
+    font-weight: 600;
+}
+
+.status-closed {
+    color: var(--success-green);
+    font-weight: 600;
+}
+
+.status-on-hold {
+    color: var(--warning-orange);
+    font-weight: 600;
+}
+
+/* Sidebar styling */
+.css-1d391kg {
+    background-color: var(--light-grey);
+}
+
+.css-1d391kg .css-1v0mbdj {
+    border-top: 3px solid var(--navy);
+}
+
+/* Hide Streamlit menu and footer */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+
+/* Custom slider styling */
+.stSlider > div > div > div {
+    background-color: var(--light-blue);
+}
+
+/* Custom selectbox styling */
+.stSelectbox > div > div > div {
+    border-color: var(--grey);
+}
+
+.stSelectbox > div > div > div:focus {
+    border-color: var(--navy);
+    box-shadow: 0 0 0 0.2rem rgba(0, 23, 90, 0.25);
+}
