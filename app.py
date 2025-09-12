@@ -107,15 +107,11 @@ def validate_session_state(step: int) -> tuple[bool, list[str]]:
         if not hasattr(st.session_state, 'column_mapping'):
             errors.append("Column mapping not initialized - please complete Step 3")
     
-    if step >= 5:  # Steps 5+ require configuration
+    if step >= 6:  # Step 6 requires configuration (Step 5 is skipped)
         if not hasattr(st.session_state, 'selected_rankings'):
             errors.append("Rankings not selected - please complete Step 4")
         if not st.session_state.selected_rankings:
             errors.append("At least one ranking must be selected in Step 4")
-    
-    if step >= 6:  # Step 6 requires generation
-        if not st.session_state.get('generated_ppt_path'):
-            errors.append("No presentation generated - please complete Step 5")
     
     return len(errors) == 0, errors
 
@@ -136,7 +132,7 @@ def reset_to_safe_state(target_step: int = 1):
                 del st.session_state[key]
     
     if target_step <= 3:
-        for key in ['selected_rankings', 'slide_previews', 'filtered_data']:
+        for key in ['selected_rankings', 'filtered_data']:
             if key in st.session_state:
                 del st.session_state[key]
     
@@ -462,97 +458,68 @@ def render_step_data_selection():
                     show_success_message(f"Sheet '{selected_sheet}' loaded successfully!")
                     st.rerun()
     
-    # Header detection with proper data availability check
+    # Intelligent Header Detection and Auto-Application
     if st.session_state.df is not None and not st.session_state.df.empty:
-        st.markdown("### 📝 Header Row Detection")
+        st.markdown("### 📝 Data Processing")
         
         # Ensure we have original_df available
         if 'original_df' not in st.session_state or st.session_state.original_df is None:
             st.session_state.original_df = st.session_state.df.copy()
         
-        # Now safely detect headers on the original dataframe
+        # Intelligent header detection and auto-application
         detected_header_row = file_processor.detect_headers(st.session_state.original_df)
         
-        # Show preview of original data structure
-        st.markdown("**Original Data Preview (first 5 rows):**")
-        preview_for_header = st.session_state.original_df.head(5).reset_index(drop=True)
-        preview_for_header.index = preview_for_header.index + 1  # Make it 1-based for display
-        st.dataframe(preview_for_header, use_container_width=True)
-        
-        # Initialize header row selection in session state
-        if 'selected_header_row' not in st.session_state:
-            st.session_state.selected_header_row = detected_header_row + 1
-        
-        # Header row selection controls
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col1:
-            header_row = st.number_input(
-                "Select header row:",
-                min_value=1,
-                max_value=min(10, len(st.session_state.original_df)),
-                value=st.session_state.selected_header_row,
-                step=1,
-                key="header_row_selector",
-                help="Row number containing column headers (1-based)"
-            )
-        
-        with col2:
-            st.markdown(f"""
-                **Current:** Row {header_row}
-                
-                **Auto-detected:** Row {detected_header_row + 1} (recommended)
-                
-                *Review the original data above to identify your header row.*
-            """)
-        
-        with col3:
-            # Apply button for explicit control
-            if st.button("Apply Header", type="primary"):
-                if header_row is not None:
-                    with st.spinner(f"Applying header row {header_row}..."):
-                        processed_df = file_processor.apply_header_row(
-                            st.session_state.original_df.copy(), 
-                            header_row - 1
-                        )
-                        st.session_state.df = processed_df
-                        st.session_state.selected_header_row = header_row
-                        show_success_message(f"Header row {header_row} applied successfully!")
-                        st.rerun()
-                else:
-                    show_error_message("Invalid header row selection")
-            
-            # Reset button to restore original state
-            if st.button("Reset", help="Reset to original data"):
-                st.session_state.df = st.session_state.original_df.copy()
-                st.session_state.selected_header_row = detected_header_row + 1
-                show_info_message("Data reset to original state")
-                st.rerun()
-        
-        # Show current processed data preview
-        st.markdown("### 👀 Processed Data Preview")
-        st.markdown(f"*Data with Row {st.session_state.selected_header_row} as headers*")
-        preview_df = file_processor.get_data_preview(st.session_state.df, max_rows=10)
-        st.dataframe(preview_df, use_container_width=True)
-        
-        # Ensure df has proper headers before moving to Step 3
-        # If user hasn't explicitly applied headers yet, apply the detected ones
+        # Auto-apply headers intelligently without user intervention
         if st.session_state.df.columns[0] == 'Column_0' or str(st.session_state.df.columns[0]).startswith('Column_'):
-            st.info("💡 Headers will be automatically applied from your selected row before column mapping.")
-            # Auto-apply headers using the selected header row - with safety check
-            if st.session_state.selected_header_row is not None:
-                processed_df = file_processor.apply_header_row(
-                    st.session_state.original_df.copy(), 
-                    st.session_state.selected_header_row - 1
-                )
-                st.session_state.df = processed_df
-            else:
-                # Fallback: use detected header row
+            with st.spinner("🔍 Detecting and applying headers intelligently..."):
                 processed_df = file_processor.apply_header_row(
                     st.session_state.original_df.copy(), 
                     detected_header_row
                 )
                 st.session_state.df = processed_df
                 st.session_state.selected_header_row = detected_header_row + 1
+                
+                show_success_message(
+                    f"Headers automatically detected and applied from row {detected_header_row + 1}",
+                    f"Found {len(processed_df.columns)} columns with meaningful headers"
+                )
+        
+        # Show current processed data with clean headers
+        st.markdown("### 👀 Your Data with Headers Applied")
+        preview_df = file_processor.get_data_preview(st.session_state.df, max_rows=8)
+        st.dataframe(preview_df, use_container_width=True)
+        
+        # Optional: Show original data in expander for reference
+        with st.expander("🔍 View Original Data Structure", expanded=False):
+            st.markdown("*Original data before header processing:*")
+            preview_for_header = st.session_state.original_df.head(5).reset_index(drop=True)
+            preview_for_header.index = preview_for_header.index + 1
+            st.dataframe(preview_for_header, use_container_width=True)
+            
+            # Advanced options for manual override (collapsed by default)
+            st.markdown("**Manual Header Override** *(if needed)*")
+            col1, col2 = st.columns([2, 1])
+            with col1:
+                manual_header_row = st.number_input(
+                    "Override header row:",
+                    min_value=1,
+                    max_value=min(10, len(st.session_state.original_df)),
+                    value=detected_header_row + 1,
+                    step=1,
+                    key="manual_header_override",
+                    help="Only change if auto-detection is incorrect"
+                )
+            with col2:
+                if st.button("Apply Override", type="secondary"):
+                    with st.spinner(f"Applying header row {manual_header_row}..."):
+                        processed_df = file_processor.apply_header_row(
+                            st.session_state.original_df.copy(), 
+                            manual_header_row - 1
+                        )
+                        st.session_state.df = processed_df
+                        st.session_state.selected_header_row = manual_header_row
+                        show_success_message(f"Header row {manual_header_row} applied successfully!")
+                        st.rerun()
         
         # Show data summary
         summary = file_processor.get_data_summary(st.session_state.df)
@@ -639,13 +606,7 @@ def render_step_configuration():
         st.error("No column mapping available. Please go back to Step 3.")
         return
     
-    # Move key configuration to top for better UX
-    st.markdown("""
-        <div class="config-panel" style="background-color: #f8f9fa; border-left: 4px solid #66A9F2; padding: 1rem; margin: 1rem 0; border-radius: 5px;">
-            <h4 style="color: #00175A; margin-bottom: 0.5rem;">⚙️ Quick Configuration</h4>
-            <p style="margin-bottom: 0;">Configure your presentation settings here - no scrolling required!</p>
-        </div>
-    """, unsafe_allow_html=True)
+    # Clean configuration interface without redundant tips
     
     file_processor = processors['file_processor']
     
@@ -740,16 +701,17 @@ def render_step_configuration():
         
         if can_generate:
             if st.button("Generate Presentation →", type="primary", key="step4_generate"):
-                st.session_state.current_step = 5
+                # Skip Step 5 (slide preview) and go directly to generation
+                st.session_state.current_step = 6
                 st.rerun()
         else:
             st.button("Generate Presentation →", disabled=True, help="Please select at least one ranking", key="step4_generate_disabled")
 
-# Step 5: Generation
+# Step 5: Generation and Download (Combined)
 @with_error_boundary
-def render_step_generation():
-    """Render presentation generation step"""
-    st.markdown("## Step 5: Generate Presentation")
+def render_step_generation_and_download():
+    """Streamlined generation and download - no redundant previews or clicks"""
+    st.markdown("## Step 5: Generate & Download Presentation")
     
     if not all([st.session_state.df is not None, st.session_state.column_mapping, st.session_state.selected_rankings]):
         st.error("Missing required data. Please complete previous steps.")
@@ -758,12 +720,12 @@ def render_step_generation():
     file_processor = processors['file_processor']
     ppt_generator = processors['ppt_generator']
     
-    # Generate slide previews first
-    if 'slide_previews' not in st.session_state:
-        st.markdown("### 🔄 Preparing Data...")
+    # Auto-generate presentation without previews
+    if 'generated_ppt_path' not in st.session_state or st.session_state.generated_ppt_path is None:
+        st.markdown("### 🚀 Generating Your Presentation...")
+        st.markdown("*This will take a moment - we're creating slides with your data.*")
         
-        with st.spinner("Processing data for presentation..."):
-            # Prepare data by ranking
+        with st.spinner("🎨 Creating PowerPoint slides..."):
             data_by_ranking = file_processor.prepare_data_for_ppt(
                 st.session_state.df, 
                 st.session_state.column_mapping
@@ -780,96 +742,95 @@ def render_step_generation():
                 st.error("❌ No data found for selected rankings.")
                 return
             
-            # Generate slide previews
-            slide_previews = ppt_generator.create_slide_preview(
-                filtered_data, 
-                st.session_state.rows_per_slide
-            )
+            # Direct generation without previews
+            try:
+                ppt_path = ppt_generator.create_presentation(
+                    filtered_data,
+                    st.session_state.rows_per_slide
+                )
+                
+                # Verify the file was actually created
+                if ppt_path and Path(ppt_path).exists():
+                    st.session_state.generated_ppt_path = ppt_path
+                    st.session_state.filtered_data = filtered_data
+                    
+                    # Show immediate success and download options
+                    st.rerun()
+                else:
+                    show_error_message("Failed to generate presentation file. Please try again.")
+                    return
+                    
+            except Exception as e:
+                debug_logger.log_error(e, "powerpoint_generation")
+                show_error_message(
+                    "Failed to generate PowerPoint presentation",
+                    "Try these solutions:\n• Check if your data has all required columns mapped\n• Try reducing the number of rows per slide\n• Ensure your file doesn't contain special characters",
+                    f"Error: {str(e)}"
+                )
+                return
+    else:
+        # Presentation generated successfully - show download options immediately
+        st.markdown("### 🎉 Presentation Generated Successfully!")
+        show_success_message("Your 90-day planning PowerPoint is ready!")
+        
+        # Show file info
+        if Path(st.session_state.generated_ppt_path).exists():
+            file_size = Path(st.session_state.generated_ppt_path).stat().st_size / (1024 * 1024)
+            filename = Path(st.session_state.generated_ppt_path).name
+            st.markdown(f"**File:** {filename} ({file_size:.2f} MB)")
             
-            st.session_state.slide_previews = slide_previews
-            st.session_state.filtered_data = filtered_data
-    
-    # Show slide previews
-    if st.session_state.slide_previews:
-        st.markdown("### 👀 Slide Preview")
-        st.markdown(f"Your presentation will contain **{len(st.session_state.slide_previews)} slides**:")
+            # Presentation summary
+            if st.session_state.filtered_data:
+                total_items = sum(len(df) for df in st.session_state.filtered_data.values())
+                rankings_included = len(st.session_state.filtered_data)
+                
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Rankings", rankings_included)
+                with col2:
+                    st.metric("Total Items", total_items)
+                with col3:
+                    st.metric("File Size", f"{file_size:.1f} MB")
+            
+            # Download Options (consolidated under single header)
+            st.markdown("### 📥 Download Options")
+            
+            # Read file for download
+            with open(st.session_state.generated_ppt_path, 'rb') as file:
+                ppt_bytes = file.read()
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.download_button(
+                    label="📄 Download PowerPoint",
+                    data=ppt_bytes,
+                    file_name=filename,
+                    mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                    type="primary"
+                )
+            with col2:
+                if st.button("📖 Generate PDF Version", help="Convert to PDF format"):
+                    show_info_message("PDF conversion feature coming soon!")
         
-        # Create columns for preview
-        preview_cols = st.columns(min(3, len(st.session_state.slide_previews)))
-        
-        for i, preview in enumerate(st.session_state.slide_previews[:6]):  # Show first 6 slides
-            col_idx = i % 3
-            with preview_cols[col_idx]:
-                with st.container():
-                    st.markdown(f"**Slide {preview['slide_number']}: {preview['ranking']}**")
-                    st.markdown(f"*{preview['slide_of_ranking']} • {preview['row_count']} items*")
-                    
-                    # Status summary
-                    st.markdown(f"🔄 Non-closed: {preview['non_closed_count']}")
-                    st.markdown(f"✅ Closed: {preview['closed_count']}")
-                    
-                    # Show progress bar for completion rate
-                    if preview['row_count'] > 0:
-                        completion_rate = preview['closed_count'] / preview['row_count']
-                        st.progress(completion_rate)
-                        st.markdown(f"*{completion_rate:.0%} completed*")
-        
-        if len(st.session_state.slide_previews) > 6:
-            st.markdown(f"*... and {len(st.session_state.slide_previews) - 6} more slides*")
-        
-        # Generation button
-        st.markdown("---")
-        
-        if 'generated_ppt_path' not in st.session_state or st.session_state.generated_ppt_path is None:
-            if st.button("🚀 Generate PowerPoint Presentation", type="primary"):
-                with st.spinner("Generating PowerPoint presentation... This may take a moment."):
-                    try:
-                        # Clear any previous generation attempts
-                        if 'generated_ppt_path' in st.session_state:
-                            del st.session_state.generated_ppt_path
-                        
-                        ppt_path = ppt_generator.create_presentation(
-                            st.session_state.filtered_data,
-                            st.session_state.rows_per_slide
-                        )
-                        
-                        # Verify the file was actually created
-                        if ppt_path and Path(ppt_path).exists():
-                            st.session_state.generated_ppt_path = ppt_path
-                            show_success_message("PowerPoint presentation generated successfully!")
-                            st.rerun()
-                        else:
-                            show_error_message("Failed to generate presentation file. Please try again.")
-                        
-                    except Exception as e:
-                        debug_logger.log_error(e, "powerpoint_generation")
-                        show_error_message(
-                            "Failed to generate PowerPoint presentation",
-                            "Try these solutions:\n• Check if your data has all required columns mapped\n• Try reducing the number of rows per slide\n• Ensure your file doesn't contain special characters\n• Try regenerating with different settings",
-                            f"Error type: {type(e).__name__}\nError details: {str(e)}"
-                        )
         else:
-            show_success_message("Presentation generated! Continue to download.")
-            # Show file info for verification
-            if Path(st.session_state.generated_ppt_path).exists():
-                file_size = Path(st.session_state.generated_ppt_path).stat().st_size / (1024 * 1024)
-                st.markdown(f"**File:** {Path(st.session_state.generated_ppt_path).name} ({file_size:.2f} MB)")
-            else:
-                st.warning("⚠️ Generated file not found. You may need to regenerate.")
+            st.warning("⚠️ Generated file not found. Please try regenerating.")
+            if st.button("🔄 Regenerate Presentation"):
+                if 'generated_ppt_path' in st.session_state:
+                    del st.session_state.generated_ppt_path
+                st.rerun()
     
-    # Navigation buttons
-    col1, col2 = st.columns(2)
+    # Navigation
+    col1, col2 = st.columns([1, 4])
     with col1:
-        if st.button("← Back to Configuration", key="step5_back"):
+        if st.button("← Back to Configuration"):
             st.session_state.current_step = 4
             st.rerun()
-    with col2:
-        if 'generated_ppt_path' in st.session_state:
-            if st.button("Continue to Download →", type="primary", key="step5_continue"):
-                st.session_state.current_step = 6
-                st.rerun()
-        else:
-            st.button("Continue to Download →", disabled=True, key="step5_continue_disabled")
+
+# Old functions - keeping for compatibility but they won't be called
+@with_error_boundary  
+def render_step_generation():
+    """Legacy function - redirects to combined function"""
+    render_step_generation_and_download()
 
 # Step 6: Download
 @with_error_boundary
@@ -890,38 +851,38 @@ def render_step_download():
     """, unsafe_allow_html=True)
     
     # Presentation summary
-    if 'slide_previews' in st.session_state:
+    if 'filtered_data' in st.session_state:
         st.markdown("### 📊 Presentation Summary")
+        
+        # Calculate summary from filtered data
+        total_items = sum(len(df) for df in st.session_state.filtered_data.values())
+        rankings_count = len([k for k, v in st.session_state.filtered_data.items() if len(v) > 0])
+        
+        # Calculate estimated slides (using same logic as ppt_generator)
+        import math
+        rows_per_slide = st.session_state.get('rows_per_slide', 10)
+        total_slides = sum(math.ceil(len(df) / rows_per_slide) for df in st.session_state.filtered_data.values() if len(df) > 0)
         
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("Total Slides", len(st.session_state.slide_previews))
+            st.metric("Total Slides", total_slides)
         with col2:
-            rankings_count = len(set(p['ranking'] for p in st.session_state.slide_previews))
             st.metric("Rankings Included", rankings_count)
         with col3:
-            total_items = sum(p['row_count'] for p in st.session_state.slide_previews)
             st.metric("Total Items", total_items)
         
         # Rankings breakdown
-        ranking_summary = {}
-        for preview in st.session_state.slide_previews:
-            ranking = preview['ranking']
-            if ranking not in ranking_summary:
-                ranking_summary[ranking] = {
-                    'slides': 0,
-                    'items': 0,
-                    'closed': 0,
-                    'non_closed': 0
-                }
-            ranking_summary[ranking]['slides'] += 1
-            ranking_summary[ranking]['items'] += preview['row_count']
-            ranking_summary[ranking]['closed'] += preview['closed_count']
-            ranking_summary[ranking]['non_closed'] += preview['non_closed_count']
-        
         st.markdown("**Breakdown by Ranking:**")
-        for ranking, stats in ranking_summary.items():
-            st.markdown(f"- **{ranking}**: {stats['slides']} slide(s), {stats['items']} items ({stats['closed']} closed, {stats['non_closed']} non-closed)")
+        for ranking, df in st.session_state.filtered_data.items():
+            if len(df) > 0:
+                slides = math.ceil(len(df) / rows_per_slide)
+                # Calculate status counts
+                closed_count = 0
+                non_closed_count = 0
+                if '_status_category' in df.columns:
+                    closed_count = (df['_status_category'] == 'closed').sum()
+                    non_closed_count = (df['_status_category'] == 'non-closed').sum()
+                st.markdown(f"- **{ranking}**: {slides} slide(s), {len(df)} items ({closed_count} closed, {non_closed_count} non-closed)")
     
     # Download options
     st.markdown("### 📥 Download Options")
@@ -1064,8 +1025,6 @@ def render_step_download():
             # Clear generated data but keep everything else
             if 'generated_ppt_path' in st.session_state:
                 del st.session_state.generated_ppt_path
-            if 'slide_previews' in st.session_state:
-                del st.session_state.slide_previews
             if 'filtered_data' in st.session_state:
                 del st.session_state.filtered_data
             st.rerun()
@@ -1159,9 +1118,11 @@ def main():
             elif st.session_state.current_step == 4:
                 render_step_configuration()
             elif st.session_state.current_step == 5:
-                render_step_generation()
+                # Step 5 is skipped - redirect to Step 6
+                st.session_state.current_step = 6
+                st.rerun()
             elif st.session_state.current_step == 6:
-                render_step_download()
+                render_step_generation_and_download()
             else:
                 # Handle invalid step
                 st.error("❌ Invalid step. Resetting to step 1.")
