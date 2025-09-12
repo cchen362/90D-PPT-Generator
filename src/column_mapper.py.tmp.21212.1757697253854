@@ -13,45 +13,43 @@ class ColumnMapper:
     """Handles column mapping between source data and PowerPoint requirements"""
     
     def __init__(self):
-        # OrderedDict to maintain the exact order: Jira Key > Target Complete Date > Description > Status > Risks/Issues/Watch Items > Component
-        from collections import OrderedDict
-        self.columns = OrderedDict([
-            ('jira', {
-                'display_name': 'Jira Key',
+        self.columns = {
+            'jira': {
+                'display_name': 'JIRA Key/ID',
                 'description': 'Unique identifier for the JIRA ticket',
                 'patterns': ['key', 'jira', 'ticket', 'issue', 'id']
-            }),
-            ('target_date', {
-                'display_name': 'Target Complete Date',
-                'description': 'Target completion date',
-                'patterns': ['target', 'date', 'due', 'completion', 'deadline', 'target_date', 'complete_date', 'finish']
-            }),
-            ('description', {
+            },
+            'description': {
                 'display_name': 'Description',
                 'description': 'Description or summary of the task',
                 'patterns': ['description', 'summary', 'title', 'desc', 'name']
-            }),
-            ('status', {
+            },
+            'status': {
                 'display_name': 'Status',
                 'description': 'Current status of the task',
                 'patterns': ['status', 'state', 'condition', 'progress']
-            }),
-            ('risks', {
-                'display_name': 'Risks/Issues/Watch Items',
-                'description': 'Risk items or issues',
-                'patterns': ['risk', 'risks', 'issues', 'notes', 'comments', 'concerns']
-            }),
-            ('component', {
-                'display_name': 'Component',
-                'description': 'Component or team responsible',
-                'patterns': ['component', 'components', 'component/s', 'team', 'area', 'group']
-            }),
-            ('ranking', {
-                'display_name': 'Calculator Ranking',
+            },
+            'ranking': {
+                'display_name': 'Ranking/Priority',
                 'description': 'Priority ranking (Accepted, Up Next, Maybe, Likely No)',
                 'patterns': ['ranking', 'priority', 'category', 'type', 'classification']
-            })
-        ])
+            },
+            'component': {
+                'display_name': 'Component/Team',
+                'description': 'Component or team responsible',
+                'patterns': ['component', 'components', 'component/s', 'team', 'area', 'group']
+            },
+            'risks': {
+                'display_name': 'Risks/Issues',
+                'description': 'Risk items or issues',
+                'patterns': ['risk', 'risks', 'issues', 'notes', 'comments', 'concerns']
+            },
+            'target_date': {
+                'display_name': 'Target Complete Date',
+                'description': 'Target completion date',
+                'patterns': ['target', 'date', 'due', 'completion', 'deadline', 'target_date', 'complete_date', 'finish']
+            }
+        }
     
     def get_auto_suggestions(self, df_columns: List[str]) -> Dict[str, str]:
         """Generate automatic column mapping suggestions"""

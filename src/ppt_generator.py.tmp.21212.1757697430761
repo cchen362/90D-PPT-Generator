@@ -16,7 +16,7 @@ import math
 from assets.brand_colors import (
     NAVY, LIGHT_BLUE, GREY, WHITE, BLACK, LIGHT_GREY,
     HEADER_FONT_SIZE, DATA_FONT_SIZE, TITLE_FONT_SIZE, STATUS_SUMMARY_FONT_SIZE,
-    PRIMARY_FONT, TITLE_FONT, RANKING_COLORS, STATUS_CIRCLE_COLORS
+    PRIMARY_FONT, TITLE_FONT
 )
 
 
@@ -72,10 +72,6 @@ class PowerPointGenerator:
             Path to created PowerPoint file
         """
         prs = Presentation()
-        
-        # Set slide dimensions to Widescreen 16:9 format
-        prs.slide_width = self.slide_width
-        prs.slide_height = self.slide_height
         
         # Remove default slide layout
         if len(prs.slides) > 0:
@@ -155,17 +151,15 @@ class PowerPointGenerator:
         title_frame.margin_top = 0
         title_frame.margin_bottom = 0
         
-        # Add colored circle icon and title text
+        # Add green circle icon and title text
         title_p = title_frame.paragraphs[0]
-        title_p.alignment = PP_ALIGN.LEFT
+        title_p.alignment = PP_ALIGN.CENTER
         
-        # Ranking-specific colored circle scaled to title font size
+        # Green circle (using bullet point as substitute)
         circle_run = title_p.add_run()
         circle_run.text = "● "
-        circle_run.font.size = Pt(TITLE_FONT_SIZE)  # Match title font size (36pt)
-        # Get ranking-specific color, fallback to green
-        ranking_color = RANKING_COLORS.get(ranking, "#28A745")
-        self._apply_rgb_color(circle_run.font.color, self._hex_to_rgb(ranking_color))
+        circle_run.font.size = Pt(16)
+        self._apply_rgb_color(circle_run.font.color, (40, 167, 69))  # Green color
         
         # Title text
         title_run = title_p.add_run()
@@ -226,9 +220,9 @@ class PowerPointGenerator:
         summary_frame.word_wrap = True
         summary_frame.auto_size = None  # Fixed size to ensure consistency
         
-        # Add status text with right alignment as specified
+        # Add status text with consistent alignment
         p = summary_frame.paragraphs[0]
-        p.alignment = PP_ALIGN.RIGHT
+        p.alignment = PP_ALIGN.LEFT
         
         # Non-closed status line
         run1 = p.add_run()
@@ -296,9 +290,7 @@ class PowerPointGenerator:
                 else:
                     cell_value = ""
                 
-                # Check if this is the status column and add colored circle
-                is_status_column = data_col == 'status'
-                self._style_data_cell(cell, cell_value, row_idx % 2 == 0, is_status_column)
+                self._style_data_cell(cell, cell_value, row_idx % 2 == 0)
     
     def _style_header_cell(self, cell, text: str):
         """Style header cell with consistent brand formatting"""
@@ -322,7 +314,7 @@ class PowerPointGenerator:
                 run.font.size = Pt(HEADER_FONT_SIZE)
                 run.font.bold = True
                 self._apply_rgb_color(run.font.color, self.colors['white'])
-                run.font.name = PRIMARY_FONT
+                run.font.name = "Arial"
         
         # Set consistent alignment and anchoring
         cell.text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
@@ -334,8 +326,8 @@ class PowerPointGenerator:
         cell.margin_top = Inches(0.05)
         cell.margin_bottom = Inches(0.05)
     
-    def _style_data_cell(self, cell, text: str, is_even_row: bool, is_status_column: bool = False):
-        """Style data cell with alternating row colors and status circles"""
+    def _style_data_cell(self, cell, text: str, is_even_row: bool):
+        """Style data cell with alternating row colors"""
         # Set background color (alternating)
         fill = cell.fill
         fill.solid()
@@ -344,41 +336,15 @@ class PowerPointGenerator:
         else:
             self._apply_rgb_color(fill.fore_color, self.colors['white'])
         
-        # Set text with status circles for status column
-        if is_status_column and text:
-            # Clear existing text
-            cell.text = ""
-            
-            # Add colored circle for status
-            text_frame = cell.text_frame
-            p = text_frame.paragraphs[0]
-            
-            # Add colored circle
-            circle_run = p.add_run()
-            circle_run.text = "● "
-            circle_run.font.size = Pt(DATA_FONT_SIZE)
-            
-            # Get status-specific color
-            status_color = STATUS_CIRCLE_COLORS.get(text, STATUS_CIRCLE_COLORS["default"])
-            self._apply_rgb_color(circle_run.font.color, self._hex_to_rgb(status_color))
-            circle_run.font.name = PRIMARY_FONT
-            
-            # Add status text in black
-            text_run = p.add_run()
-            text_run.text = text
-            text_run.font.size = Pt(DATA_FONT_SIZE)
-            self._apply_rgb_color(text_run.font.color, self.colors['black'])
-            text_run.font.name = PRIMARY_FONT
-        else:
-            # Set regular text
-            cell.text = text
-            
-            # Style text
-            for paragraph in cell.text_frame.paragraphs:
-                for run in paragraph.runs:
-                    run.font.size = Pt(DATA_FONT_SIZE)
-                    self._apply_rgb_color(run.font.color, self.colors['black'])
-                    run.font.name = PRIMARY_FONT
+        # Set text
+        cell.text = text
+        
+        # Style text
+        for paragraph in cell.text_frame.paragraphs:
+            for run in paragraph.runs:
+                run.font.size = Pt(DATA_FONT_SIZE)
+                self._apply_rgb_color(run.font.color, self.colors['black'])
+                run.font.name = "Arial"
         
         # Set text alignment
         cell.text_frame.paragraphs[0].alignment = PP_ALIGN.LEFT
@@ -414,7 +380,7 @@ class PowerPointGenerator:
         page_run.text = f"P{slide_number}"
         page_run.font.size = Pt(10)
         self._apply_rgb_color(page_run.font.color, self.colors['grey'])
-        page_run.font.name = PRIMARY_FONT
+        page_run.font.name = "Arial"
     
     def create_slide_preview(self, data_by_ranking: Dict[str, pd.DataFrame], 
                            rows_per_slide: int = 10) -> List[Dict]:

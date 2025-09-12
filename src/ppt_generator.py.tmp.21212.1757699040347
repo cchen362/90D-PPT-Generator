@@ -155,14 +155,14 @@ class PowerPointGenerator:
         title_frame.margin_top = 0
         title_frame.margin_bottom = 0
         
-        # Add colored circle icon and title text
+        # Add green circle icon and title text
         title_p = title_frame.paragraphs[0]
-        title_p.alignment = PP_ALIGN.LEFT
+        title_p.alignment = PP_ALIGN.CENTER
         
-        # Ranking-specific colored circle scaled to title font size
+        # Ranking-specific colored circle
         circle_run = title_p.add_run()
         circle_run.text = "● "
-        circle_run.font.size = Pt(TITLE_FONT_SIZE)  # Match title font size (36pt)
+        circle_run.font.size = Pt(16)
         # Get ranking-specific color, fallback to green
         ranking_color = RANKING_COLORS.get(ranking, "#28A745")
         self._apply_rgb_color(circle_run.font.color, self._hex_to_rgb(ranking_color))

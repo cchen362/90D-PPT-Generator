@@ -648,7 +648,8 @@ def render_step_configuration():
             max_value=25,
             value=st.session_state.rows_per_slide,
             step=1,
-            help="Number of data rows to display on each slide"
+            help="Number of data rows to display on each slide",
+            key="rows_per_slide_input"
         )
         st.session_state.rows_per_slide = rows_per_slide
         
@@ -799,18 +800,14 @@ def render_step_generation_and_download():
             with open(st.session_state.generated_ppt_path, 'rb') as file:
                 ppt_bytes = file.read()
             
-            col1, col2 = st.columns(2)
-            with col1:
-                st.download_button(
-                    label="📄 Download PowerPoint",
-                    data=ppt_bytes,
-                    file_name=filename,
-                    mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                    type="primary"
-                )
-            with col2:
-                if st.button("📖 Generate PDF Version", help="Convert to PDF format"):
-                    show_info_message("PDF conversion feature coming soon!")
+            # Single PowerPoint download button
+            st.download_button(
+                label="📊 Download PowerPoint (.pptx)",
+                data=ppt_bytes,
+                file_name=filename,
+                mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                type="primary"
+            )
         
         else:
             st.warning("⚠️ Generated file not found. Please try regenerating.")
@@ -916,84 +913,18 @@ def render_step_download():
         timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
         download_filename = f"90D_PPT_{base_name}_{timestamp}.pptx"
         
-        # Download buttons in side-by-side layout
-        col1, col2 = st.columns(2)
+        # Download PowerPoint presentation
+        st.download_button(
+            label="📊 Download PowerPoint (.pptx)",
+            data=ppt_data,
+            file_name=download_filename,
+            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            type="primary"
+        )
         
-        with col1:
-            # PowerPoint download button
-            st.download_button(
-                label="📊 Download PowerPoint (.pptx)",
-                data=ppt_data,
-                file_name=download_filename,
-                mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                type="primary"
-            )
-            # File info
-            file_size_mb = len(ppt_data) / (1024 * 1024)
-            st.markdown(f"**PowerPoint file size:** {file_size_mb:.2f} MB")
-        
-        with col2:
-            # PDF Export section
-            pdf_exporter = processors['pdf_exporter']
-            export_info = pdf_exporter.get_export_info()
-            
-            if export_info['available']:
-                if st.button("📄 Generate PDF Version", type="secondary"):
-                    with st.spinner("Converting to PDF... This may take a moment."):
-                        try:
-                            # Try to export using the generated PowerPoint file first
-                            pdf_path = None
-                            
-                            if export_info['method'] == 'powerpoint':
-                                pdf_path = pdf_exporter.export_presentation_to_pdf(
-                                    ppt_path=st.session_state.generated_ppt_path
-                                )
-                            elif export_info['method'] == 'reportlab':
-                                # Use the data to recreate as PDF
-                                pdf_path = pdf_exporter.export_presentation_to_pdf(
-                                    data_by_ranking=st.session_state.get('filtered_data', {}),
-                                    rows_per_slide=st.session_state.rows_per_slide
-                                )
-                            
-                            if pdf_path and Path(pdf_path).exists():
-                                # Read PDF data for download
-                                with open(pdf_path, 'rb') as f:
-                                    pdf_data = f.read()
-                                
-                                # Generate PDF filename
-                                pdf_filename = download_filename.replace('.pptx', '.pdf')
-                                
-                                st.download_button(
-                                    label="📄 Download PDF",
-                                    data=pdf_data,
-                                    file_name=pdf_filename,
-                                    mime="application/pdf",
-                                    type="secondary"
-                                )
-                                
-                                pdf_size_mb = len(pdf_data) / (1024 * 1024)
-                                st.markdown(f"**PDF file size:** {pdf_size_mb:.2f} MB")
-                                
-                                show_success_message("PDF version generated successfully!")
-                            else:
-                                show_error_message(
-                                    "Failed to generate PDF",
-                                    f"PDF export method '{export_info['method']}' did not work. You can still download the PowerPoint version above.",
-                                    f"Export method: {export_info['method']}\nPlatform: {export_info['platform']}"
-                                )
-                        
-                        except Exception as e:
-                            show_error_message(
-                                "PDF conversion failed",
-                                "You can still download the PowerPoint version above. PDF export may require additional software.",
-                                f"Error: {str(e)}\nMethod: {export_info['method']}"
-                            )
-            else:
-                st.markdown("### 📄 PDF Export")
-                show_info_message(
-                    "PDF export not available",
-                    f"PDF export requires additional libraries. Method attempted: {export_info['method']}\nPlatform: {export_info['platform']}"
-                )
+        # File info
+        file_size_mb = len(ppt_data) / (1024 * 1024)
+        st.markdown(f"**File size:** {file_size_mb:.2f} MB")
         
     except FileNotFoundError:
         show_error_message("Presentation file not found. Please regenerate the presentation.")
