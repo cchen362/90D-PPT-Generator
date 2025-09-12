@@ -237,7 +237,8 @@ class ColumnMapper:
                 if valid_rankings == 0:
                     warnings.append(f"No valid ranking values found in column '{ranking_col}' - slides may be empty")
                 elif valid_rankings < len(df) * 0.5:
-                    warnings.append(f"Many ranking values in '{ranking_col}' are not recognized - some data may be excluded")
+                    # No longer show this warning since rankings are optional
+                    pass
         
         # Show warnings if any
         if warnings:
@@ -258,7 +259,7 @@ class ColumnMapper:
         preview_data = {}
         ppt_columns = [
             ('JIRA', 'jira'),
-            ('Target Complete Date', None),  # Always empty
+            ('Target Complete Date', 'target_date'),
             ('Description', 'description'),
             ('Status', 'status'),
             ('Risks/Issues', 'risks'),

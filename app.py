@@ -642,6 +642,9 @@ def render_step_configuration():
     with config_col2:
         st.markdown("### 📊 Layout Settings")
         
+        def update_rows_per_slide():
+            st.session_state.rows_per_slide = st.session_state.rows_per_slide_input
+        
         rows_per_slide = st.number_input(
             "Rows per slide:",
             min_value=5,
@@ -649,7 +652,8 @@ def render_step_configuration():
             value=st.session_state.rows_per_slide,
             step=1,
             help="Number of data rows to display on each slide",
-            key="rows_per_slide_input"
+            key="rows_per_slide_input",
+            on_change=update_rows_per_slide
         )
         st.session_state.rows_per_slide = rows_per_slide
         
@@ -791,7 +795,7 @@ def render_step_generation_and_download():
                 with col2:
                     st.metric("Total Items", total_items)
                 with col3:
-                    st.metric("File Size", f"{file_size:.1f} MB")
+                    st.metric("File Size", f"{file_size:.2f} MB")
             
             # Download Options (consolidated under single header)
             st.markdown("### 📥 Download Options")
