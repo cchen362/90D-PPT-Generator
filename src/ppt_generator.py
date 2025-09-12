@@ -45,9 +45,9 @@ class PowerPointGenerator:
         self.table_height = Inches(4.5)    # Adequate height for rows
         
         # Status summary positioning - top right corner as in template
-        self.status_summary_left = Inches(9.5)    # Right side positioning (shifted left more)
+        self.status_summary_left = Inches(9.2)    # Right side positioning (shifted left for buffer)
         self.status_summary_top = Inches(0.5)     # Top margin
-        self.status_summary_width = Inches(3.5)   # Even wider width to fit text on one line
+        self.status_summary_width = Inches(3.8)   # Extra wide to handle double-digit counts
         self.status_summary_height = Inches(1.2)  # Adequate height
     
     def _hex_to_rgb(self, hex_color: str) -> Tuple[int, int, int]:
