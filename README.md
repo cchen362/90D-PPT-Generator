@@ -25,7 +25,7 @@ Your Excel/CSV file should contain these columns (column names can vary):
 - **Ranking**: Priority ranking (e.g., "Ranking", "Priority")
 
 ### Optional Columns
-- **Component/Team**: Responsible team (e.g., "Component/s", "Team")
+- **Region/POS**: Geographic region or point of sale (e.g., "Region", "POS", "Location")
 - **Risks/Issues**: Risk items (e.g., "Risk", "Issues", "Notes")
 
 ## Supported Ranking Values
@@ -83,9 +83,9 @@ Each slide contains:
   1. JIRA (from mapped data)
   2. Target Complete Date (blank for user input)
   3. Description (from mapped data)
-  4. Status (from mapped data) 
+  4. Status (from mapped data)
   5. Risks/Issues/Watch Items (from mapped data or blank)
-  6. Component (from mapped data)
+  6. Region (from mapped data)
 
 ## File Structure
 

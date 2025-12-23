@@ -1025,7 +1025,7 @@ def render_sidebar():
     - Description/Summary
     - Status
     - Ranking/Priority
-    - Component/Team
+    - Region/POS
     - Risks/Issues
     
     **Ranking Values:**

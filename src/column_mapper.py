@@ -13,7 +13,7 @@ class ColumnMapper:
     """Handles column mapping between source data and PowerPoint requirements"""
     
     def __init__(self):
-        # OrderedDict to maintain the exact order: Jira Key > Target Complete Date > Description > Status > Risks/Issues/Watch Items > Component
+        # OrderedDict to maintain the exact order: Jira Key > Target Complete Date > Description > Status > Risks/Issues/Watch Items > Region
         from collections import OrderedDict
         self.columns = OrderedDict([
             ('jira', {
@@ -42,9 +42,9 @@ class ColumnMapper:
                 'patterns': ['risk', 'risks', 'issues', 'notes', 'comments', 'concerns']
             }),
             ('component', {
-                'display_name': 'Component',
-                'description': 'Component or team responsible',
-                'patterns': ['component', 'components', 'component/s', 'team', 'area', 'group']
+                'display_name': 'Region',
+                'description': 'Geographic region or point of sale',
+                'patterns': ['region', 'regions', 'pos', 'point of sale', 'location', 'geography', 'geo']
             }),
             ('ranking', {
                 'display_name': 'Calculator Ranking',
@@ -103,7 +103,7 @@ class ColumnMapper:
             'desc': ['description', 'summary'],
             'description': ['desc', 'summary'],
             'status': ['state', 'condition'],
-            'component': ['team', 'area', 'group'],
+            'region': ['pos', 'location', 'geography', 'geo'],
             'ranking': ['priority', 'type']
         }
         
@@ -263,7 +263,7 @@ class ColumnMapper:
             ('Description', 'description'),
             ('Status', 'status'),
             ('Risks/Issues', 'risks'),
-            ('Component', 'component')
+            ('Region', 'component')
         ]
         
         for ppt_col_name, target_col in ppt_columns:

@@ -38,7 +38,7 @@ Teams regularly need to create PowerPoint presentations from Excel data containi
   3. Description (mapped from "Description" column)
   4. Status (mapped from "Status" column)
   5. Risks/Issues/Watch Items (blank or user-mapped)
-  6. Component (mapped from "Component/s" column)
+  6. Region (mapped from "Region" or "POS" column)
 - Add status summary in top-right corner: "In Progress/On Hold/Pending Review: X, Closed: Y"
 - Professional enterprise styling with brand colors and fonts
 
@@ -140,7 +140,7 @@ pillow>=10.0.0  # for slide previews
 | Jira Number | "Key", "Jira", "Ticket" | High |
 | Status | "Status", "State" | High |
 | Description | "Description", "Summary" | High |
-| Component | "Component/s", "Components", "Team" | Medium |
+| Region | "Region", "Regions", "POS", "Location" | Medium |
 | Ranking | "Ranking", "Priority", "Category" | High |
 | Risk Items | "Risk", "Issues", "Notes" | Low (optional) |
 

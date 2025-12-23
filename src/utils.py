@@ -79,7 +79,7 @@ def detect_header_row(df: pd.DataFrame, sheet_name: Optional[str] = None) -> int
             'key', 'jira', 'ticket', 'id', 'issue',
             'status', 'state', 'condition', 'progress',
             'description', 'summary', 'title', 'desc', 'name',
-            'component', 'team', 'area', 'group',
+            'region', 'regions', 'pos', 'location',
             'ranking', 'priority', 'category', 'type',
             'date', 'created', 'updated', 'modified',
             'risk', 'risks', 'notes', 'comments'
@@ -297,7 +297,7 @@ def get_column_suggestions(df_columns: List[str]) -> Dict[str, str]:
         'jira': ['key', 'jira', 'ticket', 'issue', 'id'],
         'description': ['description', 'summary', 'title', 'desc'],
         'status': ['status', 'state', 'condition'],
-        'component': ['component', 'components', 'component/s', 'team', 'area'],
+        'component': ['region', 'regions', 'pos', 'point of sale', 'location'],
         'ranking': ['ranking', 'priority', 'category', 'type']
     }
     

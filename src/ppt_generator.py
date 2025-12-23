@@ -261,10 +261,10 @@ class PowerPointGenerator:
         table_columns = [
             ('JIRA', 'jira'),
             ('Target Complete Date', 'target_date'),
-            ('Description', 'description'), 
+            ('Description', 'description'),
             ('Status', 'status'),
             ('Risks/Issues/Watch Items', 'risks'),
-            ('Component', 'component')
+            ('Region', 'component')
         ]
         
         rows = len(data) + 1  # +1 for header row

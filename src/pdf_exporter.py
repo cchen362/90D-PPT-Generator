@@ -134,7 +134,7 @@ class PDFExporter:
                     story.append(Spacer(1, 12))
                     
                     # Create data table
-                    table_data = [['JIRA', 'Target Complete Date', 'Description', 'Status', 'Risks/Issues', 'Component']]
+                    table_data = [['JIRA', 'Target Complete Date', 'Description', 'Status', 'Risks/Issues', 'Region']]
                     
                     for _, row in slide_data.iterrows():
                         table_row = [
