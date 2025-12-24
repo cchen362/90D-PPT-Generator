@@ -312,10 +312,10 @@ class PowerPointGenerator:
     
     def _style_header_cell(self, cell, text: str):
         """Style header cell with consistent brand formatting"""
-        # Set background color to black
+        # Set background color to dark blue (navy)
         fill = cell.fill
         fill.solid()
-        self._apply_rgb_color(fill.fore_color, self.colors['black'])
+        self._apply_rgb_color(fill.fore_color, self.colors['navy'])
         
         # Set text
         cell.text = text
