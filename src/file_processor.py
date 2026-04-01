@@ -417,6 +417,12 @@ class FileProcessor:
                 if not ranking_data.empty:
                     # Create PowerPoint data structure
                     ppt_data = self._create_ppt_dataframe(ranking_data, column_mapping)
+                    # Sort rows alphabetically by Assignee (case-insensitive, blanks last)
+                    if 'assignee' in ppt_data.columns:
+                        ppt_data = ppt_data.sort_values(
+                            by='assignee',
+                            key=lambda col: col.apply(lambda x: (1, '') if not str(x).strip() else (0, str(x).lower().strip()))
+                        ).reset_index(drop=True)
                     result[ranking] = ppt_data
         else:
             # No ranking column mapped - create a single slide with "General" ranking
@@ -424,6 +430,12 @@ class FileProcessor:
             general_data = df.copy()
             if not general_data.empty:
                 ppt_data = self._create_ppt_dataframe(general_data, column_mapping)
+                # Sort rows alphabetically by Assignee (case-insensitive, blanks last)
+                if 'assignee' in ppt_data.columns:
+                    ppt_data = ppt_data.sort_values(
+                        by='assignee',
+                        key=lambda col: col.apply(lambda x: (1, '') if not str(x).strip() else (0, str(x).lower().strip()))
+                    ).reset_index(drop=True)
                 result['General'] = ppt_data
         
         return result
@@ -439,7 +451,8 @@ class FileProcessor:
             'description': column_mapping.get('description', ''),
             'status': column_mapping.get('status', ''),
             'component': column_mapping.get('component', ''),
-            'risks': column_mapping.get('risks', '')
+            'risks': column_mapping.get('risks', ''),
+            'assignee': column_mapping.get('assignee', '')
         }
         
         for target_col, source_col in column_map.items():

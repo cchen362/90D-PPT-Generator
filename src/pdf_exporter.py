@@ -134,8 +134,8 @@ class PDFExporter:
                     story.append(Spacer(1, 12))
                     
                     # Create data table
-                    table_data = [['JIRA', 'Target Complete Date', 'Description', 'Status', 'Risks/Issues', 'Region']]
-                    
+                    table_data = [['JIRA', 'Target Complete Date', 'Description', 'Status', 'Risks/Issues', 'Region', 'Assignee']]
+
                     for _, row in slide_data.iterrows():
                         table_row = [
                             str(row.get('jira', '')),
@@ -143,12 +143,13 @@ class PDFExporter:
                             str(row.get('description', ''))[:50] + ('...' if len(str(row.get('description', ''))) > 50 else ''),
                             str(row.get('status', '')),
                             str(row.get('risks', ''))[:30] + ('...' if len(str(row.get('risks', ''))) > 30 else ''),
-                            str(row.get('component', ''))
+                            str(row.get('component', '')),
+                            str(row.get('assignee', ''))
                         ]
                         table_data.append(table_row)
-                    
+
                     # Create table
-                    table = Table(table_data, colWidths=[1*inch, 1.2*inch, 2.5*inch, 0.8*inch, 1.5*inch, 1*inch])
+                    table = Table(table_data, colWidths=[1*inch, 1.2*inch, 2.2*inch, 0.8*inch, 1.5*inch, 1*inch, 0.8*inch])
                     table.setStyle(TableStyle([
                         ('BACKGROUND', (0, 0), (-1, 0), colors.black),
                         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),

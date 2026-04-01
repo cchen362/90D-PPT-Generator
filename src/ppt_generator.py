@@ -37,11 +37,23 @@ class PowerPointGenerator:
         # Slide dimensions (Widescreen 16:9 - PowerPoint standard)
         self.slide_width = Inches(13.333)  # 13.333 inches wide
         self.slide_height = Inches(7.5)     # 7.5 inches tall (16:9 ratio)
+
+        # Table column widths. Keep this as the single source of truth so the
+        # rendered table width and its positioning stay in sync when columns change.
+        self.table_col_widths = [
+            Inches(1.4),  # JIRA
+            Inches(1.2),  # Target Complete Date
+            Inches(3.5),  # Description
+            Inches(0.95), # Status
+            Inches(1.85), # Risks/Issues/Watch Items
+            Inches(1.35), # Region
+            Inches(1.75), # Assignee
+        ]
+        self.table_width = sum(self.table_col_widths, 0)
         
-        # Table positioning and sizing - optimized for widescreen format
-        self.table_left = Inches(0.5)      # Left margin
+        # Table positioning and sizing - center the full table width on the slide
+        self.table_left = int((self.slide_width - self.table_width) / 2)
         self.table_top = Inches(2.0)       # Below title and status
-        self.table_width = Inches(12.3)    # Use most of slide width with margins
         self.table_height = Inches(4.5)    # Adequate height for rows
         
         # Status summary positioning - top right corner as in template
@@ -264,24 +276,26 @@ class PowerPointGenerator:
             ('Description', 'description'),
             ('Status', 'status'),
             ('Risks/Issues/Watch Items', 'risks'),
-            ('Region', 'component')
+            ('Region', 'component'),
+            ('Assignee', 'assignee')
         ]
         
         rows = len(data) + 1  # +1 for header row
         cols = len(table_columns)
         
-        # Create table
-        table = slide.shapes.add_table(
-            rows, cols, self.table_left, self.table_top, 
+        # Create table — keep shape reference to enforce bounding box width
+        tbl_shape = slide.shapes.add_table(
+            rows, cols, self.table_left, self.table_top,
             self.table_width, self.table_height
-        ).table
-        
-        # Set column widths with precise measurements for consistency
-        # Optimized column widths for widescreen format (12.3 inches total available)
-        col_widths = [Inches(1.2), Inches(1.5), Inches(4.0), Inches(1.2), Inches(2.5), Inches(1.9)]
-        for i, width in enumerate(col_widths):
+        )
+        table = tbl_shape.table
+
+        # Set exact column widths, then keep the shape width matched to that sum
+        # so PowerPoint does not stretch the table to a stale bounding box.
+        for i, width in enumerate(self.table_col_widths):
             if i < len(table.columns):
                 table.columns[i].width = width
+        tbl_shape.width = self.table_width
         
         # Style header row with consistent formatting
         header_height = Inches(0.4)  # Fixed header height

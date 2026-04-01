@@ -8,6 +8,8 @@ import pandas as pd
 from pathlib import Path
 import sys
 
+PPT_LAYOUT_VERSION = "2026-04-01-table-center-v2"
+
 # Add src directory to Python path
 sys.path.append(str(Path(__file__).parent / "src"))
 sys.path.append(str(Path(__file__).parent / "assets"))
@@ -65,6 +67,8 @@ def initialize_session_state():
         st.session_state.rows_per_slide = 10
     if 'generated_ppt_path' not in st.session_state:
         st.session_state.generated_ppt_path = None
+    if 'generated_ppt_layout_version' not in st.session_state:
+        st.session_state.generated_ppt_layout_version = None
     if '_file_just_uploaded' not in st.session_state:
         st.session_state._file_just_uploaded = False
     if 'selected_header_row' not in st.session_state:
@@ -228,7 +232,6 @@ def with_error_boundary(step_func):
 initialize_session_state()
 
 # Initialize processors
-@st.cache_resource
 def get_processors():
     return {
         'file_processor': FileProcessor(),
@@ -729,7 +732,15 @@ def render_step_generation_and_download():
         return
     
     file_processor = processors['file_processor']
-    ppt_generator = processors['ppt_generator']
+    # Build a fresh generator so layout/code changes are reflected immediately
+    # instead of being held by a cached resource instance.
+    ppt_generator = PowerPointGenerator()
+
+    # If the generation layout changed, invalidate any previously generated file
+    # so the user doesn't keep downloading a stale presentation from session state.
+    if st.session_state.generated_ppt_layout_version != PPT_LAYOUT_VERSION:
+        st.session_state.generated_ppt_path = None
+        st.session_state.generated_ppt_layout_version = None
     
     # Auto-generate presentation without previews
     if 'generated_ppt_path' not in st.session_state or st.session_state.generated_ppt_path is None:
@@ -763,6 +774,7 @@ def render_step_generation_and_download():
                 # Verify the file was actually created
                 if ppt_path and Path(ppt_path).exists():
                     st.session_state.generated_ppt_path = ppt_path
+                    st.session_state.generated_ppt_layout_version = PPT_LAYOUT_VERSION
                     st.session_state.filtered_data = filtered_data
                     
                     # Show immediate success and download options

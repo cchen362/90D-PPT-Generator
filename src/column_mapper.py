@@ -46,6 +46,11 @@ class ColumnMapper:
                 'description': 'Geographic region or point of sale',
                 'patterns': ['region', 'regions', 'pos', 'point of sale', 'location', 'geography', 'geo']
             }),
+            ('assignee', {
+                'display_name': 'Assignee',
+                'description': 'Person assigned to the task',
+                'patterns': ['assignee', 'assigned', 'assigned to', 'owner', 'responsible']
+            }),
             ('ranking', {
                 'display_name': 'Calculator Ranking',
                 'description': 'Priority ranking (Accepted, Up Next, Maybe, Likely No)',
@@ -263,7 +268,8 @@ class ColumnMapper:
             ('Description', 'description'),
             ('Status', 'status'),
             ('Risks/Issues', 'risks'),
-            ('Region', 'component')
+            ('Region', 'component'),
+            ('Assignee', 'assignee')
         ]
         
         for ppt_col_name, target_col in ppt_columns:
